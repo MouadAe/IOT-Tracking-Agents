@@ -1,15 +1,20 @@
-from _typeshed import IdentityFunction
 import enum
-
-
-class Agent:
-    def __init__(this, firstName, type, isFree):
-        this.firstName = firstName
-        this.type = type
-        this.isFree = isFree
-    # Using enum class create enumerations
-
 
 class ENUM_AgentType(enum.Enum):
     client = "CLIENT"
     taxi = "TAXI"
+
+class Agent:
+    def __init__(self, firstName, agentType, isFree):
+        self.firstName : string = firstName
+        self.type : ENUM_AgentType = agentType
+        self.isFree : bool = isFree
+    # Using enum class create enumerations
+
+class TrakingAgent:
+    def __init__(self,latitude,longitude,date_time,id_agent):
+        self.latitude = latitude
+        self.longitude = longitude
+        self.date_time = date_time
+        self.id_agent = id_agent
+

@@ -8,7 +8,6 @@ id integer primary key autoincrement,
 latitude double,
 longitude double,
 Date_time text,
-type text,
 speed double,
 id_agent text
 );
