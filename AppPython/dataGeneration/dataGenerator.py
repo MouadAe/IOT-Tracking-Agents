@@ -1,13 +1,12 @@
-import sys,os
-sys.path.append(os.getcwd() + '\\config')
-sys.path.append(os.getcwd() + '\\dataGeneration')
-from agentClasses import Agent, TrakingAgent
 import threading,json,random
 from time import sleep
 import paho.mqtt.client as mqtt
 import pandas as pd
 from datetime import datetime
-from fileconfig import *
+import sys
+sys.path.append('..')
+from agentClasses import Agent, TrakingAgent
+from config.fileconfig import *
 
 
 DATE_LIST = pd.date_range(end=datetime.today(),

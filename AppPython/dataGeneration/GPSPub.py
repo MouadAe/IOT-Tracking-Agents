@@ -1,5 +1,3 @@
-import sys
-import os
 import random
 import threading
 import json
@@ -11,11 +9,11 @@ from pynput import keyboard
 import socket
 import traceback
 import time
-sys.path.append(os.getcwd() + '\\config')
-sys.path.append(os.getcwd() + '\\dataGeneration')
+import sys
+sys.path.append('..')
 # from fileconfig import MQTT, socketAdd
 from dataGenerator import publishDataToMqtt
-from fileconfig import *
+from config.fileconfig import *
 
 
 def on_press(key):
