@@ -109,7 +109,6 @@ with keyboard.Listener(on_press=on_press) as listener:
 
             if int(lst[2]) == 1:
                 message_Json_Data:dict = map_msg_to_json(lst, peerIP)
-
                 publish_to_topic(MQTT_Topic_Tracking, message_Json_Data)
                 if(dataIsGenerated == False):
                     publishDataToMqtt(float(lst[3].strip()),

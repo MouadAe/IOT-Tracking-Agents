@@ -20,10 +20,10 @@ def dbConnection():
             mycursor.execute("CREATE DATABASE "+mysql_db_name)  
             dbConnection()
         except:
-            return False;
+            print("data base no exist")
+            return False
 
 
-dbConnection()
 host = ""
 port = 5555
 socketAdd = (host, port)
