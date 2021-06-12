@@ -1,32 +1,38 @@
-import sqlite3
+import mysql.connector
+from fileconfig import dbConnection
 
-dbName = "AgentsTracking.db"
-TableSchema = """
-drop table if exists trakingAgent;
-Create Table trakingAgent(
-id integer primary key autoincrement,
-latitude double,
-longitude double,
-Date_time text,
-speed double,
-id_agent text
-);
-drop table if exists Agent;
-Create Table Agent(
-id integer primary key autoincrement,
-firstName double,
-type text,
-isFree INTEGER
-)
-"""
+def creatTables():
+    print("-------------------")
+    TableSchema = '''
+    Create Table Agent(
+    id integer primary key AUTO_INCREMENT,
+    firstName double,
+    type text,
+    isFree INTEGER
+    )
+    '''
+    sql ='''Create Table gps_tracking(
+    id integer primary key AUTO_INCREMENT,
+    latitude double,
+    longitude double,
+    Date_time text,
+    speed double,
+    id_agent text
+    )'''
+    # Connection
+    conn = dbConnection()
+    curs = conn.cursor()
+    curs.execute("DROP TABLE IF EXISTS gps_tracking")
+    curs.execute("DROP TABLE IF EXISTS agent")
+    # Tables
+    curs.execute(sql)
+    curs.execute(TableSchema)
+    
+    print("tables created")
 
-# Connection
-conn = sqlite3.connect(dbName)
-curs = conn.cursor()
+creatTables()
 
-# Tables
-sqlite3.complete_statement(TableSchema)
-curs.executescript(TableSchema)
+# curs.close()
+# conn.close()
 
-curs.close()
-conn.close()
+

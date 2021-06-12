@@ -49,7 +49,6 @@ def on_message(mosq, obj, msg):
     # print("MQTT Message: " + str(msg.payload))
     jsonData = str(msg.payload).split("'")[1]
     print("Data: " + jsonData)
-
     insertData(jsonData)
 
 
