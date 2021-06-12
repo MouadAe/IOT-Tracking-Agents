@@ -1,17 +1,21 @@
-import paho.mqtt.client as mqtt
+import sys
+import os
 import random
 import threading
 import json
 from datetime import datetime
 from time import sleep
 import re
+import paho.mqtt.client as mqtt
 from pynput import keyboard
 import socket
 import traceback
 import time
-from ..config.fileconfig import MQTT, socketAdd
-from .dataGenerator import publishDataToMqtt
-from ..config.fileconfig import *
+sys.path.append(os.getcwd() + '\\config')
+sys.path.append(os.getcwd() + '\\dataGeneration')
+# from fileconfig import MQTT, socketAdd
+from dataGenerator import publishDataToMqtt
+from fileconfig import *
 
 
 def on_press(key):
@@ -101,20 +105,18 @@ with keyboard.Listener(on_press=on_press) as listener:
     while break_program == False:
         try:
             # message, address = s.recvfrom(8192)
-            print("hamza test ", break_program)
             message, (peerIP, peerport) = s.recvfrom(8192)
 
             lst = re.split("[,\'']", str(message))
 
             if int(lst[2]) == 1:
-                message_Json_Data = map_msg_to_json(lst, peerIP)
+                message_Json_Data:dict = map_msg_to_json(lst, peerIP)
 
                 publish_to_topic(MQTT_Topic_Tracking, message_Json_Data)
                 if(dataIsGenerated == False):
-                    publishDataToMqtt(message_Json_Data.get("lat"),
-                                      message_Json_Data.get("lon"))
+                    publishDataToMqtt(float(lst[3].strip()),
+                                      float(lst[4].strip()))
                     dataIsGenerated = True
-
                 # if address not in dic:
                 #     dic[address]=list()
                 #     dic[address].append(acceleration_Json_Data)
@@ -123,7 +125,7 @@ with keyboard.Listener(on_press=on_press) as listener:
 
                 # print(message)
                 print(peerIP, '  ', message_Json_Data)
-                sleep(2)  # make a pause
+                sleep(4)  # make a pause
         except:
             print("exeption ", break_program)
             traceback.print_exc()
