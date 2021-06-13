@@ -1,1 +1,3 @@
- sleep(4)
+import sys,os
+sys.path.append(os.getcwd()+'\\AppPython\\dataGeneration')
+sys.path.append(os.getcwd()+'\\AppPython\\config')

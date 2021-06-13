@@ -1,19 +1,60 @@
+import sys,os
+sys.path.append(os.getcwd()+'\\AppPython\\dataGeneration')
+sys.path.append(os.getcwd()+'\\AppPython\\config')
 import threading,json,random
 from time import sleep
 import paho.mqtt.client as mqtt
 import pandas as pd
 from datetime import datetime
-import sys
-sys.path.append('..')
-from agentClasses import Agent, TrakingAgent
-from config.fileconfig import *
+from agentClasses import *
+# from fileconfig import *
+
+#---------------------------------------------------start config-----------
+import mysql.connector
+from time import sleep
+
+MQTT_BROKER = "broker.mqttdashboard.com"
+MQTT_Topic_Tracking = "testtopic/aouane"
+MQTT_Port = 1883
+MQTT_Keep_Alive_Interval = 30
+
+mysql_db_name ="agentstracking"
+
+def dbConnection():
+    try :
+        conn =mysql.connector.connect(host = "localhost",port="3306",user= "root",
+        passwd= "",db = mysql_db_name)
+        return conn
+    except:
+        try : 
+            conn =mysql.connector.connect(host = "localhost",port="3306",user= "root",
+            passwd= "")
+            mycursor = conn.cursor()
+            mycursor.execute("CREATE DATABASE "+mysql_db_name) 
+            sleep(2) 
+            dbConnection()
+        except:
+            print("error db")
+            return False
 
 
-DATE_LIST = pd.date_range(end=datetime.today(),
-                          periods=10).to_pydatetime().tolist()
+
+host = ""
+port = 5555
+socketAdd = (host, port)
+
+#----------------------------------------end config-------------------------------
+
+
+
+
+db = dbConnection()
+curs = db.cursor()
+
+DATE_LIST = pd.date_range(end=datetime.today(),periods=10).to_pydatetime().tolist()
 
 Keep_Alive_Interval = 30
-
+agents_lenght=20
 
 def on_connect(client, userdata, rc):
     if rc != 0:
@@ -40,19 +81,55 @@ def publishToTopic(topic, message):
 
 def publishDataToMqtt(latitude, longitude):
 
-    for i in range(0,50) :
+    for i in range(1,agents_lenght) :
         print("--------------------------RANDOM-------------------------------------")
-        agentData = TrakingAgent(
-            round(random.uniform(latitude - 0.01,latitude + 0.1), 6),  # latitude
-            round(random.uniform(longitude - 0.1,longitude + 0.1), 6),  # longitude
+        trakingData = TrakingAgent(
+            round(random.uniform(latitude - 0.01,latitude + 0.01), 6),  # latitude
+            round(random.uniform(longitude - 0.01,longitude + 0.01), 6),  # longitude
             str(random.choice(DATE_LIST)),  # date_time
-            random.randint(1, 170)  # id_agent
+            i # id_agent
         )
-        gpsJsonData = json.dumps(agentData.__dict__)
+        gpsJsonData = json.dumps(trakingData.__dict__)
         print(gpsJsonData)
+
         print("---------------------------------------------------------------------")
-        publishToTopic(MQTT_Topic_Tracking, gpsJsonData)
-        sleep(5)
+        # publishToTopic(MQTT_Topic_Tracking, gpsJsonData)
+        # sleep(1)
+
+
+def generate_agentData():
+    for i in range(1,agents_lenght):
+        random_agent_type = random.choice([ENUM_AgentType.client.value,ENUM_AgentType.taxi.value])
+        random_hold_state = random.choice([True,False])
+        agentData = Agent("A_"+str(i),random_agent_type,random_hold_state)
+        print(agentData.__dict__)
+        try:
+            if(tableIsEmpty() == True):
+                sql = """insert into Agent(firstName,type,isFree) values(%s,%s ,%s )"""
+                curs.execute(sql, [agentData.firstName,agentData.type,agentData.isFree])
+                db.commit()
+            else:
+                print("DB isn't empty")
+        except:
+            print("error instert into agent db")
+
+
+def tableIsEmpty():
+    try:
+        sql="""select count(*) from Agent"""
+        curs.execute(sql)
+        (number_of_rows,)=curs.fetchone()
+        if number_of_rows != 0 :
+            return False
+        else:
+            return True
+    except:
+        print("error in db")
+
+
+
+
+generate_agentData()
 
 
 mqttc = mqtt.Client()
@@ -62,3 +139,5 @@ mqttc.on_publish = on_publish
 mqttc.connect(MQTT_BROKER, int(MQTT_Port),int(MQTT_Keep_Alive_Interval))
 
 # publishDataToMqtt()
+
+# .A           p1=37.4 p2=38 p3 p4 

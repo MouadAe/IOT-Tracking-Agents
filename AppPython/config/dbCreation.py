@@ -6,9 +6,9 @@ def creatTables():
     TableSchema = '''
     Create Table Agent(
     id integer primary key AUTO_INCREMENT,
-    firstName double,
+    firstName text,
     type text,
-    isFree INTEGER
+    isFree BOOLEAN
     )
     '''
     sql ='''Create Table gps_tracking(
@@ -21,6 +21,8 @@ def creatTables():
     )'''
     # Connection
     conn = dbConnection()
+    if(conn==False):
+        exit()
     curs = conn.cursor()
     curs.execute("DROP TABLE IF EXISTS gps_tracking")
     curs.execute("DROP TABLE IF EXISTS agent")

@@ -3,38 +3,75 @@ import sqlite3
 import json
 import mysql.connector
 import MySQLdb
-import sys
-sys.path.append('..')
-from  config.fileconfig import *
+import sys,os
+sys.path.append(os.getcwd()+'\\AppPython\\dataGenerationcle')
+sys.path.append(os.getcwd()+'\\AppPython\\config')
+# from fileconfig import *
+
 '''
 dbName = "PeopleTracking.db"
 conn = sqlite3.connect(dbName)
 curs = conn.cursor()
 '''
+#---------------------------------------------------start config-----------
+import mysql.connector
+from time import sleep
 
-db = dbConnection
+MQTT_BROKER = "broker.mqttdashboard.com"
+MQTT_Topic_Tracking = "testtopic/aouane"
+MQTT_Port = 1883
+MQTT_Keep_Alive_Interval = 30
+
+mysql_db_name ="agentstracking"
+
+def dbConnection():
+    try :
+        conn =mysql.connector.connect(host = "localhost",port="3306",user= "root",
+        passwd= "",db = mysql_db_name)
+        return conn
+    except:
+        try : 
+            conn =mysql.connector.connect(host = "localhost",port="3306",user= "root",
+            passwd= "")
+            mycursor = conn.cursor()
+            mycursor.execute("CREATE DATABASE "+mysql_db_name) 
+            sleep(2) 
+            dbConnection()
+        except:
+            print("error db")
+            return False
+
+
+
+host = ""
+port = 5555
+socketAdd = (host, port)
+#----------------------------------------end config-------------------------------
+
+db = dbConnection()
+if(db==False):
+    exit()
+
 curs = db.cursor()
-
 
 
 def insertData(data):
     jsonData = json.loads(data)
-    latitude = jsonData["latitude"]
-    longitude = jsonData["longitude"]
-    Date_time = jsonData["time"]
-    speed = float(jsonData["speed"])
-    citizen_id = int(jsonData["id"])
+    latitude = jsonData["lat"]
+    longitude = jsonData["lon"]
+    Date_time = jsonData["Date"]
+    speed = float(jsonData["alt"])
+    id_agent = jsonData["Sensor_ID"]
     try:
-
-        sql = """insert into gps_log(latitude,longitude,date_time,speed,citizen_id) values(%s,%s ,%s ,%s,%s)"""
-        curs.execute(sql, [latitude, longitude, Date_time, speed,citizen_id])
+        sql = """insert into gps_tracking(latitude,longitude,date_time,speed,id_agent) values(%s,%s ,%s ,%s,%s)"""
+        curs.execute(sql, [latitude, longitude, Date_time, speed,id_agent])
         db.commit()
         print("------- Data Inserted ---------")
     except MySQLdb.Error as e:
         print(e)
+# insertData(json.dumps({"Sensor_ID": "GPS 192.168.1.106", "Date": "13-Jun-2021 01:36:34:885205", "lat": "33.573806", "lon": "-7.555822", "alt": "120.6"}))
 
-
-def on_connect(mosq, obj, rc):
+def on_connect(self,mosq, obj, rc):
     if rc == 0:
         print("Connected")
         mqttc.subscribe(MQTT_Topic_Tracking, 0)  # Subscribe to all sensors at Base Topic
@@ -46,10 +83,10 @@ def on_message(mosq, obj, msg):
     # this is the Master call for saving MQTT Date into DB
     print("MQTT Data Received ...")
     print("MQTT Topic: " + msg.topic)
-    # print("MQTT Message: " + str(msg.payload))
     jsonData = str(msg.payload).split("'")[1]
     print("Data: " + jsonData)
     insertData(jsonData)
+    # print(str(msg.payload).split("'")[1])
 
 
 def on_subscribe(mosq, obj, mid, granted_qos):
@@ -68,13 +105,13 @@ mqttc.subscribe((MQTT_Topic_Tracking, 0))
 
 mqttc.loop_forever()  # Continue the network loop
 
-broker = 'mqtt.localdomain'
-broker_port = 1883
-broker_topic = '/test/location/#'
-#broker_clientid = 'mqttuide2mysqlScript'
-#mysql config
-mysql_server = 'thebeast.localdomain'
-mysql_username = 'root'
-mysql_passwd = ''
-mysql_db = 'mqtt'
+# broker = 'mqtt.localdomain'
+# broker_port = 1883
+# broker_topic = '/test/location/#'
+# #broker_clientid = 'mqttuide2mysqlScript'
+# #mysql config
+# mysql_server = 'thebeast.localdomain'
+# mysql_username = 'root'
+# mysql_passwd = ''
+# mysql_db = 'mqtt'
 #change table below.

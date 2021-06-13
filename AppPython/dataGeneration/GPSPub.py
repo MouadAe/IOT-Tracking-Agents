@@ -1,3 +1,6 @@
+import sys,os
+sys.path.append(os.getcwd()+'\\AppPython\\dataGeneration')
+sys.path.append(os.getcwd()+'\\AppPython\\config')
 import random
 import threading
 import json
@@ -9,11 +12,43 @@ from pynput import keyboard
 import socket
 import traceback
 import time
-import sys
-sys.path.append('..')
-# from fileconfig import MQTT, socketAdd
+# from fileconfig import MQTT, socketAdd 
 from dataGenerator import publishDataToMqtt
-from config.fileconfig import *
+#---------------------------------------------------start config-----------
+import mysql.connector
+from time import sleep
+
+MQTT_BROKER = "broker.mqttdashboard.com"
+MQTT_Topic_Tracking = "testtopic/aouane"
+MQTT_Port = 1883
+MQTT_Keep_Alive_Interval = 30
+
+mysql_db_name ="agentstracking"
+
+def dbConnection():
+    try :
+        conn =mysql.connector.connect(host = "localhost",port="3306",user= "root",
+        passwd= "",db = mysql_db_name)
+        return conn
+    except:
+        try : 
+            conn =mysql.connector.connect(host = "localhost",port="3306",user= "root",
+            passwd= "")
+            mycursor = conn.cursor()
+            mycursor.execute("CREATE DATABASE "+mysql_db_name) 
+            sleep(2) 
+            dbConnection()
+        except:
+            print("error db")
+            return False
+
+
+
+host = ""
+port = 5555
+socketAdd = (host, port)
+
+#----------------------------------------end config-------------------------------
 
 
 def on_press(key):
@@ -111,10 +146,12 @@ with keyboard.Listener(on_press=on_press) as listener:
                 message_Json_Data:dict = map_msg_to_json(lst, peerIP)
 
                 publish_to_topic(MQTT_Topic_Tracking, message_Json_Data)
+
+                print("====>",peerIP, '  ', message_Json_Data)
                 if(dataIsGenerated == False):
-                    publishDataToMqtt(float(lst[3].strip()),
-                                      float(lst[4].strip()))
+                    publishDataToMqtt(float(lst[3].strip()),float(lst[4].strip()))
                     dataIsGenerated = True
+                
                 # if address not in dic:
                 #     dic[address]=list()
                 #     dic[address].append(acceleration_Json_Data)
@@ -122,8 +159,7 @@ with keyboard.Listener(on_press=on_press) as listener:
                 #     dic[address].append(acceleration_Json_Data)
 
                 # print(message)
-                print(peerIP, '  ', message_Json_Data)
-                sleep(4)  # make a pause
+                sleep(2)  # make a pause
         except:
             print("exeption ", break_program)
             traceback.print_exc()
