@@ -18,7 +18,7 @@ import mysql.connector
 from time import sleep
 
 MQTT_BROKER = "broker.mqttdashboard.com"
-MQTT_Topic_Tracking = "testtopic/aouane"
+MQTT_Topic_Tracking = "iot/smartTaxi/tracking"
 MQTT_Port = 1883
 MQTT_Keep_Alive_Interval = 30
 
@@ -57,11 +57,11 @@ curs = db.cursor()
 
 def insertData(data):
     jsonData = json.loads(data)
-    latitude = jsonData["lat"]
-    longitude = jsonData["lon"]
-    Date_time = jsonData["Date"]
-    speed = float(jsonData["alt"])
-    id_agent = jsonData["Sensor_ID"]
+    latitude = jsonData["latitude"]
+    longitude = jsonData["longitude"]
+    Date_time = jsonData["date_time"]
+    speed = float(1)
+    id_agent = jsonData["id_agent"]
     try:
         sql = """insert into gps_tracking(latitude,longitude,date_time,speed,id_agent) values(%s,%s ,%s ,%s,%s)"""
         curs.execute(sql, [latitude, longitude, Date_time, speed,id_agent])

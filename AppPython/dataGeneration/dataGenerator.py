@@ -14,7 +14,7 @@ import mysql.connector
 from time import sleep
 
 MQTT_BROKER = "broker.mqttdashboard.com"
-MQTT_Topic_Tracking = "testtopic/aouane"
+MQTT_Topic_Tracking = "iot/smartTaxi/tracking"
 MQTT_Port = 1883
 MQTT_Keep_Alive_Interval = 30
 
@@ -54,7 +54,7 @@ curs = db.cursor()
 DATE_LIST = pd.date_range(end=datetime.today(),periods=10).to_pydatetime().tolist()
 
 Keep_Alive_Interval = 30
-agents_lenght=20
+agents_lenght=50
 
 def on_connect(client, userdata, rc):
     if rc != 0:
@@ -84,8 +84,8 @@ def publishDataToMqtt(latitude, longitude):
     for i in range(1,agents_lenght) :
         print("--------------------------RANDOM-------------------------------------")
         trakingData = TrakingAgent(
-            round(random.uniform(latitude - 0.01,latitude + 0.01), 6),  # latitude
-            round(random.uniform(longitude - 0.01,longitude + 0.01), 6),  # longitude
+            round(random.uniform(latitude - 0.03,latitude + 0.03), 6),  # latitude
+            round(random.uniform(longitude - 0.03,longitude + 0.03), 6),  # longitude
             str(random.choice(DATE_LIST)),  # date_time
             i # id_agent
         )
@@ -93,25 +93,26 @@ def publishDataToMqtt(latitude, longitude):
         print(gpsJsonData)
 
         print("---------------------------------------------------------------------")
-        # publishToTopic(MQTT_Topic_Tracking, gpsJsonData)
+        publishToTopic(MQTT_Topic_Tracking, gpsJsonData)
         # sleep(1)
 
 
 def generate_agentData():
-    for i in range(1,agents_lenght):
-        random_agent_type = random.choice([ENUM_AgentType.client.value,ENUM_AgentType.taxi.value])
-        random_hold_state = random.choice([True,False])
-        agentData = Agent("A_"+str(i),random_agent_type,random_hold_state)
-        print(agentData.__dict__)
-        try:
-            if(tableIsEmpty() == True):
-                sql = """insert into Agent(firstName,type,isFree) values(%s,%s ,%s )"""
-                curs.execute(sql, [agentData.firstName,agentData.type,agentData.isFree])
-                db.commit()
-            else:
-                print("DB isn't empty")
-        except:
-            print("error instert into agent db")
+    if(tableIsEmpty() == True):
+        for i in range(1,agents_lenght):
+            random_agent_type = random.choice([ENUM_AgentType.client.value,ENUM_AgentType.taxi.value])
+            random_hold_state = random.choice([True,False])
+            agentData = Agent("A_"+str(i),random_agent_type,random_hold_state)
+            print(agentData.__dict__)
+            try:
+                    sql = """insert into Agent(firstName,type,isFree) values(%s,%s ,%s )"""
+                    curs.execute(sql, [agentData.firstName,agentData.type,agentData.isFree])
+                    db.commit()
+            except:
+                print("error instert into agent db")
+    else:
+        print("DB isn't empty")
+
 
 
 def tableIsEmpty():

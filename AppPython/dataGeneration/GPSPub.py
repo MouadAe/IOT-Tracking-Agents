@@ -19,7 +19,7 @@ import mysql.connector
 from time import sleep
 
 MQTT_BROKER = "broker.mqttdashboard.com"
-MQTT_Topic_Tracking = "testtopic/aouane"
+MQTT_Topic_Tracking = "iot/smartTaxi/tracking"
 MQTT_Port = 1883
 MQTT_Keep_Alive_Interval = 30
 
@@ -62,11 +62,11 @@ def on_press(key):
 
 def map_msg_to_json(lst, addr):
     dic = {}
-    dic['Sensor_ID'] = 'GPS ' + str(addr)
-    dic['Date'] = (datetime.today()).strftime("%d-%b-%Y %H:%M:%S:%f")
-    dic['lat'] = lst[3].strip()
-    dic['lon'] = lst[4].strip()
-    dic['alt'] = lst[5].strip()
+    dic['id_agent'] = 'GPS ' + str(addr)
+    dic['date_time'] = (datetime.today()).strftime("%d-%b-%Y %H:%M:%S:%f")
+    dic['latitude'] = lst[3].strip()
+    dic['longitude'] = lst[4].strip()
+    # dic['alt'] = lst[5].strip()
     return json.dumps(dic)
 
 
@@ -144,7 +144,6 @@ with keyboard.Listener(on_press=on_press) as listener:
 
             if int(lst[2]) == 1:
                 message_Json_Data:dict = map_msg_to_json(lst, peerIP)
-
                 publish_to_topic(MQTT_Topic_Tracking, message_Json_Data)
 
                 print("====>",peerIP, '  ', message_Json_Data)
@@ -159,7 +158,7 @@ with keyboard.Listener(on_press=on_press) as listener:
                 #     dic[address].append(acceleration_Json_Data)
 
                 # print(message)
-                sleep(2)  # make a pause
+                sleep(5)  # make a pause
         except:
             print("exeption ", break_program)
             traceback.print_exc()

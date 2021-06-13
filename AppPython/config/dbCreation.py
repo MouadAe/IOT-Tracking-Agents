@@ -35,6 +35,6 @@ def creatTables():
 creatTables()
 
 # curs.close()
-# conn.close()
+# conn.close() C:\Users\HP\Desktop\ENSET\S4_ENSET\IOT\IOTTrackingAgents\AppPython\config
 
 
